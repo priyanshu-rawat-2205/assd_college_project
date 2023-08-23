@@ -1,18 +1,34 @@
+import core.Pipeline as pipe
 import cv2
-#Capture video from webcam
-vid_capture = cv2.VideoCapture(2)
-vid_cod = cv2.VideoWriter_fourcc(*'XVID')
-output = cv2.VideoWriter("videos/cam_video.mp4", vid_cod, 20.0, (640,480))
-while(True):
-     # Capture each frame of webcam video
-     ret,frame = vid_capture.read()
-     cv2.imshow("My cam video", frame)
-     output.write(frame)
-     # Close and break the loop after pressing "x" key
-     if cv2.waitKey(1) &0XFF == ord('x'):
-         break
-# close the already opened camera
-vid_capture.release()
-# close the already opened file
-output.release()
-# close the window and de-allocate any associated memory usage
+import multiprocessing
+from time import sleep
+
+count = 0
+lines = []
+points = []
+with open('core/temp/points.txt', 'r') as file:
+    while line := file.readline():
+        if not line:
+            continue
+        if count == 2:
+            points.append(lines)
+            count = 0
+            lines = []
+        lines.append(int(line.strip()))
+        count += 1
+    points.append(lines)
+
+points = tuple(i for i in points)
+# print(points)
+# print(len(points))
+
+reference = 0
+while True:
+    sleep(10)
+    p2 = multiprocessing.Process(target=pipe.Pipeline.process, args= ["_",points])
+    p2.start()
+    p2.join()
+    print()
+    reference += 1
+    if reference == 10:
+        break
